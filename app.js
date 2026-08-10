@@ -72,19 +72,21 @@ new Vue({
     }
   },
   methods: {
-    // 乗車条件（往復:1.0 / 片道:0.5）に応じた傾斜配分ロジック（運転手は負担0円）
+   // 💡 交通費の精算ロジック（運転手:0円 / 大人・監督:0円 / 往復:1.0 / 片道:0.5）
     calculatePerPersonCost(car, attendanceType = 'both') {
       if (!car.cost || car.cost <= 0) return 0;
 
       const passengers = this.getPassengersInCar(car.id);
       if (passengers.length === 0) return 0;
 
-      // 同乗者全体の合計重みポイントを算出
+      // 負担対象となる子ども同乗者だけの合計重みポイントを算出（大人は重み0）
       const totalWeight = passengers.reduce((sum, p) => {
+        if (p.grade === 'adult') return sum; // 大人/監督/コーチは負担なし(0円)
         const weight = (p.attendance === 'both') ? 1.0 : 0.5;
         return sum + weight;
       }, 0);
 
+      // 負担対象者がいない（全員大人など）場合は0円
       if (totalWeight === 0) return 0;
 
       // 1ポイントあたりの単価
@@ -266,6 +268,7 @@ new Vue({
       localStorage.setItem('noriai_settings', JSON.stringify(this.settings));
     },
 
+// 📋 精算結果を含むLINE送信用テキストのコピー
     copyResult() {
       let text = '🚗 【Noriai】配車＆交通費精算結果 🚗\n';
       
@@ -276,14 +279,18 @@ new Vue({
       text += '\n--------------------\n';
       this.selectedCars.forEach((car, index) => {
         const passengers = this.getPassengersInCar(car.id).map(p => {
-        const attLabel = this.getAttendanceLabel(p.attendance);
-        return `${p.name}(${attLabel})`;
-      }).join(', ');
+          const attLabel = this.getAttendanceLabel(p.attendance);
+          // 大人の場合は(監督/往復/負担なし) のように明記
+          // if (p.grade === 'adult') {
+          //   return `${p.name}(大人/${attLabel}/負担なし)`;
+          // }
+          return `${p.name}(${attLabel})`;
+        }).join(', ');
 
         const costBoth = this.calculatePerPersonCost(car, 'both');
         const costSingle = this.calculatePerPersonCost(car, 'single');
 
-        text += `【${index + 1}】${car.driver}号`;
+        text += `【${index + 1}台目】${car.driver}号`;
         // text += `  [運転手] ${car.driver} (0円)\n`;
         text += ` ${passengers || 'なし'}\n`;
         if (car.cost > 0) {
@@ -294,7 +301,7 @@ new Vue({
       });
 
       navigator.clipboard.writeText(text).then(() => {
-        alert('配車結果と精算金額をコピーしました！LINE等にそのまま貼り付けられます。');
+        alert('配車結果と精算金額をコピーしました！');
       });
     }
   },
