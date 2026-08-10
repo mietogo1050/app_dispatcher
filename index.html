@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>部活配車アプリ Noriai</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Vue2.js -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+</head>
+<body class="bg-light py-4">
+
+<div id="app" class="container bg-white p-4 rounded-3 shadow-sm" style="max-width: 800px;">
+  <h1 class="h3 text-primary border-bottom pb-2 mb-4">🚗部活配車シュミレーター Noriai</h1>
+  
+  <!-- 基本設定エリア -->
+  <div class="card bg-info-subtle border-info-subtle mb-4">
+    <div class="card-body">
+      <h2 class="h6 card-title fw-bold text-info-emphasis">【基本設定】</h2>
+      <div class="row align-items-center g-2 mb-3">
+        <div class="col-auto">
+          <label class="col-form-label col-form-label-sm">配車上限台数:</label>
+        </div>
+        <div class="col-auto">
+          <input type="number" class="form-control form-control-sm" v-model.number="settings.maxCars" min="0" style="width: 70px;">
+        </div>
+        <div class="col-auto">
+          <span class="form-text text-muted my-0">（※0で上限なし）</span>
+        </div>
+      </div>
+      
+      <hr class="text-info-emphasis">
+      
+      <h2 class="h6 card-title fw-bold text-info-emphasis">【行動予定・連絡事項】</h2>
+      <div class="row g-2">
+        <div class="col-md-6 mb-2">
+          <input type="text" class="form-control form-control-sm" v-model="settings.date" placeholder="日時：7月19日(日) 朝8:00壱岐小集合">
+        </div>
+        <div class="col-md-6 mb-2">
+         <input type="text" class="form-control form-control-sm" v-model="settings.destination" placeholder="〇〇大会 会場：雁ノ巣レクリエーションセンター">
+        </div>
+        <div class="col-12 mb-2">
+          <input type="text" class="form-control form-control-sm" v-model="settings.memo" placeholder="メモ：練習着/試合着、お弁当/おにぎり、補食">
+        </div>
+      </div>
+
+      <!-- 警告メッセージ -->
+      <div v-if="alertMessage" class="alert alert-danger mb-0 mt-3 py-2 fw-bold" role="alert">
+        {{ alertMessage }}
+      </div>
+    </div>
+  </div>
+
+  <!-- ① 出欠管理 -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <h2 class="h5 card-title text-primary border-start border-4 border-primary ps-2 mb-3">👤 参加・出欠設定</h2>
+      
+      <!-- メンバー選択・追加フォーム -->
+      <div class="card bg-warning-subtle border-warning-subtle mb-3">
+        <div class="card-body">
+          <h3 class="h6 card-title fw-bold text-warning-emphasis mb-2">➕ 参加メンバーの追加</h3>
+          
+          <!-- 未回答者の一覧表示 -->
+          <div class="mb-3">
+            <div class="small fw-bold text-muted mb-1">
+              未回答の人 (残り {{ unrespondedMembers.length }} 人):
+            </div>
+            <div>
+              <span v-if="unrespondedMembers.length === 0" class="badge bg-secondary">全員選択済みです！</span>
+              <span 
+                v-for="m in unrespondedMembers" 
+                :key="m.id" 
+                class="badge bg-outline-danger text-danger border border-danger me-1 mb-1"
+                style="cursor: pointer;"
+                @click="selectedMemberId = m.id"
+                title="クリックして選択"
+              >
+               {{ m.name }}
+              </span>
+            </div>
+          </div>
+
+          <!-- メイン機能：マスターリストから選択して追加 -->
+          <div class="row g-2 align-items-center mb-3">
+            <div class="col-md-5">
+              <select class="form-select form-select-sm" v-model="selectedMemberId">
+                <option value="" disabled>メンバーを選択してください</option>
+                <option v-for="m in unrespondedMembers" :key="m.id" :value="m.id">
+                  {{ m.name }} ({{ m.grade === 'high' ? '高学年' : '低学年' }})
+                </option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <select class="form-select form-select-sm" v-model="selectedAttendance">
+                <option value="both">往復乗車</option>
+                <option value="outward">往路のみ</option>
+                <option value="return">復路のみ</option>
+                <option value="self">送迎不要</option>
+                <option value="absent">不参加</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <button class="btn btn-warning btn-sm w-100 fw-bold" @click="addMemberFromList" :disabled="unrespondedMembers.length === 0">
+                選択して追加
+              </button>
+            </div>
+          </div>
+
+          <!-- リストにない新規メンバーを直接入力して追加 -->
+          <div class="pt-2 border-top border-warning-subtle">
+            <div class="small fw-bold text-muted mb-2">💡 リストにない人を直接追加する:</div>
+            <div class="row g-2 align-items-center">
+              <div class="col-md-5">
+                <input type="text" class="form-control form-control-sm" v-model="newMemberName" placeholder="名前（例：田中弟、佐藤コーチ）">
+              </div>
+              <div class="col-md-4">
+                <select class="form-select form-select-sm" v-model="newMemberGrade">
+                  <option value="high">高学年</option>
+                  <option value="low">低学年</option>
+                  <option value="adult">大人 / コーチ</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <button class="btn btn-outline-warning text-dark btn-sm w-100 fw-bold" @click="addNewMemberDirectly">
+                  直接追加
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 追加済みメンバー一覧 -->
+      <div class="list-group">
+        <div v-if="members.length === 0" class="text-muted small text-center py-2">
+          登録されているメンバーはいません。上のフォームから追加してください。
+        </div>
+
+        <div v-for="(member, index) in members" 
+             :key="member.id" 
+             class="list-group-item d-flex justify-content-between align-items-center bg-light mb-2 rounded"
+             v-show="!member.assignedCarId || member.attendance === 'self' || member.attendance === 'absent'">
+          <div>
+            <span class="fw-bold me-2">{{ member.name }}</span>
+            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill me-1" v-if="member.grade === 'high'">高学年</span>
+            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill me-1" v-else-if="member.grade === 'low'">低学年</span>
+            <span class="badge bg-secondary-subtle text-secondary border rounded-pill me-1" v-else-if="member.grade === 'adult'">大人</span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <select class="form-select form-select-sm" style="width: 120px;" v-model="member.attendance" @change="handleAttendanceChange(member)">
+              <option value="both">往復</option>
+              <option value="outward">往路のみ</option>
+              <option value="return">復路のみ</option>
+              <option value="self">送迎不要</option>
+              <option value="absent">不参加</option>
+            </select>
+            <button class="btn btn-link btn-sm text-danger text-decoration-none px-1" @click="removeMember(index)">削除</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② 車両登録 & 配車割り当て -->
+  <div class="card">
+    <div class="card-body">
+      <h2 class="h5 card-title text-primary border-start border-4 border-primary ps-2 mb-3">🚙 車両登録・配車割り当て</h2>
+      
+      <!-- 車両登録フォーム -->
+      <div class="card bg-primary-subtle border-primary-subtle mb-4">
+        <div class="card-body">
+          <h3 class="h6 card-title fw-bold text-primary-emphasis mb-3">➕ 出せる車の追加（運転手・定員）</h3>
+          <div class="row g-2 align-items-center">
+            <div class="col-md-5">
+              <input type="text" class="form-control form-control-sm" v-model="newCar.driver" placeholder="運転手名（例：田中）">
+            </div>
+            <div class="col-md-4">
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">定員</span>
+                <input type="number" class="form-control" v-model.number="newCar.capacity" min="1" max="10">
+                <span class="input-group-text">人（運転手含む）</span>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <button class="btn btn-primary btn-sm w-100 fw-bold" @click="addCar">車を追加</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <button class="btn btn-primary" @click="autoAssign" :disabled="selectedCars.length === 0">
+          🪄 自動配車をシミュレーションする
+        </button>
+        <span class="small text-muted">登録中の車: {{ cars.length }} 台</span>
+      </div>
+
+      <!-- 車別の配車シート -->
+      <div v-if="cars.length === 0" class="text-muted small text-center py-3 border rounded mb-3 bg-light">
+        登録されている車がありません。上のフォームから配車可能な車を追加してください。
+      </div>
+
+      <div v-for="(car, index) in selectedCars" :key="car.id" class="card bg-light border mb-3">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h3 class="h6 card-title mb-0 fw-bold">🚙 【{{ index + 1 }}台目】{{ car.driver }}の車</h3>
+            <div>
+              <span class="badge bg-secondary me-2">定員: {{ getCarPassengerCount(car.id) }} / {{ car.capacity }}人</span>
+              <button class="btn btn-outline-danger btn-sm py-0 px-1" @click="removeCar(car.id)" style="font-size: 11px;">車を削除</button>
+            </div>
+          </div>
+          <ul class="list-unstyled mb-3 ms-2 small">
+            <li class="text-muted mb-1">運転手: {{ car.driver }} (負担額: 0円)</li>
+            <li v-for="passenger in getPassengersInCar(car.id)" :key="passenger.id" class="my-1">
+              {{ passenger.name }} 
+              <span class="badge bg-primary-subtle text-primary border border-primary-subtle me-1">[{{ getAttendanceLabel(passenger.attendance) }}]</span>
+              <span class="badge bg-secondary-subtle text-secondary me-1" v-if="passenger.grade === 'high'">高学年</span>
+              <span class="badge bg-secondary-subtle text-secondary me-1" v-else-if="passenger.grade === 'low'">低学年</span>
+              <span class="badge bg-secondary-subtle text-secondary me-1" v-else-if="passenger.grade === 'adult'">大人</span>
+            </li>
+          </ul>
+
+          <!-- 車ごとの交通費入力＆清算エリア -->
+          <div class="p-2 bg-white rounded border small">
+            <div class="fw-bold text-success mb-2">💴 交通費（高速代）の入力:</div>
+            <div class="row g-2 align-items-center">
+              <div class="col-sm-5">
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text">費用</span>
+                  <input type="number" class="form-control" v-model.number="car.cost" min="0" placeholder="0" @input="saveToLocalStorage">
+                  <span class="input-group-text">円</span>
+                </div>
+              </div>
+              <div class="col-sm-7">
+                <div class="text-end small">
+                  <span class="fw-bold text-danger me-2">【往復】{{ calculatePerPersonCost(car, 'both') }} 円/人</span>
+                  <span class="fw-bold text-primary">【片道】{{ calculatePerPersonCost(car, 'single') }} 円/人</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 未割り当てメンバー調整リスト -->
+      <div v-if="unassignedMembers.length > 0" class="alert alert-warning mb-3">
+        <div class="fw-bold mb-2">⚠️ まだ車に乗っていない人:</div>
+        <div v-for="member in unassignedMembers" :key="member.id" class="d-flex align-items-center gap-2 mb-2">
+          <span class="small fw-bold" style="min-width: 100px;">{{ member.name }}</span>
+          <span>➔</span>
+          <select class="form-select form-select-sm" style="width: 150px;" v-model="member.assignedCarId" @change="manualAssign(member)">
+            <option :value="null">未選択</option>
+            <option v-for="car in selectedCars" :value="car.id" :key="car.id">{{ car.driver }}の車</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- コピーボタン -->
+      <div class="pt-3 border-top border-dashed">
+        <button class="btn btn-secondary" @click="copyResult">📋 配車＆精算結果をコピーする</button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- JSファイルの読み込み -->
+<script src="member.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
