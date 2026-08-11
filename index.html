@@ -35,21 +35,56 @@
 
         <hr class="text-info-emphasis">
 
-        <h2 class="h6 card-title fw-bold text-info-emphasis">【行動予定・連絡事項】</h2>
-        <div class="row g-2">
-          <div class="col-md-6 mb-2">
-            <input type="text" class="form-control form-control-sm" v-model="settings.date"
-              placeholder="日時：7月19日(日) 朝8:00壱岐小集合">
-          </div>
-          <div class="col-md-6 mb-2">
-            <input type="text" class="form-control form-control-sm" v-model="settings.destination"
-              placeholder="〇〇大会 会場：雁ノ巣レクリエーションセンター">
-          </div>
-          <div class="col-12 mb-2">
-            <input type="text" class="form-control form-control-sm" v-model="settings.memo"
-              placeholder="メモ：練習着/試合着、お弁当/おにぎり、補食">
-          </div>
-        </div>
+<h2 class="h6 card-title fw-bold text-info-emphasis">【行動予定・連絡事項】</h2>
+<div class="row g-2">
+  <!-- 日付（カレンダー選択） -->
+  <div class="col-md-4 mb-2">
+    <div class="input-group input-group-sm">
+      <span class="input-group-text">日付</span>
+      <input type="date" class="form-control" v-model="settings.date">
+    </div>
+  </div>
+
+  <!-- 集合時間（手入力） -->
+  <div class="col-md-4 mb-2">
+    <div class="input-group input-group-sm">
+      <span class="input-group-text">集合時間</span>
+      <input type="text" class="form-control" v-model="settings.meetingTime" placeholder="例：朝 8:00">
+    </div>
+  </div>
+
+  <!-- 集合場所（手入力） -->
+  <div class="col-md-4 mb-2">
+    <div class="input-group input-group-sm">
+      <span class="input-group-text">集合場所</span>
+      <input type="text" class="form-control" v-model="settings.meetingPlace" placeholder="例：壱岐小学校">
+    </div>
+  </div>
+
+  <!-- 概要・イベント名 -->
+  <div class="col-md-6 mb-2">
+    <div class="input-group input-group-sm">
+      <span class="input-group-text">概要</span>
+      <input type="text" class="form-control" v-model="settings.summary" placeholder="例：〇〇地区夏季大会">
+    </div>
+  </div>
+
+  <!-- 行き先・会場 -->
+  <div class="col-md-6 mb-2">
+    <div class="input-group input-group-sm">
+      <span class="input-group-text">行き先</span>
+      <input type="text" class="form-control" v-model="settings.destination" placeholder="例：雁ノ巣レクリエーションセンター">
+    </div>
+  </div>
+  
+  <!-- メモ -->
+  <div class="col-md-6 mb-2">
+    <div class="input-group input-group-sm">
+      <span class="input-group-text">メモ</span>
+      <input type="text" class="form-control" v-model="settings.memo" placeholder="練習着/試合着、お弁当/おにぎり、補食">
+    </div>
+  </div>
+</div>
 
         <!-- 警告メッセージ -->
         <div v-if="alertMessage" class="alert alert-danger mb-0 mt-3 py-2 fw-bold" role="alert">
@@ -116,7 +151,7 @@
               <div class="row g-2 align-items-center">
                 <div class="col-md-5">
                   <input type="text" class="form-control form-control-sm" v-model="newMemberName"
-                    placeholder="名前（例：田中弟、佐藤コーチ）">
+                    placeholder="名前（例：監督、代表）">
                 </div>
                 <div class="col-md-4">
                   <select class="form-select form-select-sm" v-model="newMemberGrade">

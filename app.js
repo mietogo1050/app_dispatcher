@@ -15,10 +15,13 @@ new Vue({
         capacity: 5
       },
 
-      settings: {
+settings: {
         maxCars: 0,
         date: '',
-        destination: '',
+        meetingTime: '',  // 🆕 集合時間
+        meetingPlace: '', // 🆕 集合場所
+        summary: '',     // 🆕 概要（大会名・イベント名）
+        destination: '', // 行き先（会場）
         memo: ''
       },
       cars: [],
@@ -270,10 +273,13 @@ new Vue({
 
 // 📋 精算結果を含むLINE送信用テキストのコピー
     copyResult() {
-      let text = '🚗 【Noriai】配車＆交通費精算結果 🚗\n';
+      let text = '🚗 配車案内 \n';
       
       if (this.settings.date) text += `📅 日時: ${this.settings.date}\n`;
-      if (this.settings.destination) text += `📍 行先: ${this.settings.destination}\n`;
+      if (this.settings.meetingTime) text += `⏰ 集合時間: ${this.settings.meetingTime}\n`;
+      if (this.settings.meetingPlace) text += `📍 集合場所: ${this.settings.meetingPlace}\n`;
+      if (this.settings.summary) text += `🚩 概要: ${this.settings.summary}\n`;      // 概要
+      if (this.settings.destination) text += `🏁 行き先: ${this.settings.destination}\n`; // 🏁 行き先
       if (this.settings.memo) text += `📝 メモ: ${this.settings.memo}\n`;
       
       text += '\n--------------------\n';
