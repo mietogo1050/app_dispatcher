@@ -131,12 +131,14 @@
               <div class="col-md-4">
                 <select class="form-select form-select-sm" v-model="selectedAttendance">
                   <option value="both">往復乗車</option>
-                  <option value="outward">往路のみ</option>
-                  <option value="return">復路のみ</option>
+                  <option value="outward">行きのみ</option>
+                  <option value="return">帰りのみ</option>
                   <option value="self">送迎不要</option>
                   <option value="absent">不参加</option>
                 </select>
               </div>
+              <p class="fw-bold text-danger me-2 
+              small">※配車可能な場合は、「往復乗車」を選択してください。</p>
               <div class="col-md-3">
                 <button class="btn btn-warning btn-sm w-100 fw-bold" @click="addMemberFromList"
                   :disabled="unrespondedMembers.length === 0">
@@ -193,8 +195,8 @@
               <select class="form-select form-select-sm" style="width: 120px;" v-model="member.attendance"
                 @change="handleAttendanceChange(member)">
                 <option value="both">往復</option>
-                <option value="outward">往路のみ</option>
-                <option value="return">復路のみ</option>
+                <option value="outward">行きのみ</option>
+                <option value="return">帰りのみ</option>
                 <option value="self">送迎不要</option>
                 <option value="absent">不参加</option>
               </select>
@@ -282,7 +284,7 @@
             </ul>
             <!-- 車ごとの交通費入力＆清算エリア -->
             <div class="p-2 bg-white rounded border small">
-              <div class="fw-bold text-success mb-2">💴 交通費（高速代）の入力:</div>
+              <div class="fw-bold text-success mb-2">交通費（高速代）の入力:</div>
               <div class="row g-2 align-items-center">
                 <div class="col-sm-5">
                   <div class="input-group input-group-sm">
@@ -313,14 +315,14 @@
             <select class="form-select form-select-sm" style="width: 150px;" v-model="member.assignedCarId"
               @change="manualAssign(member)">
               <option :value="null">未選択</option>
-              <option v-for="car in selectedCars" :value="car.id" :key="car.id">{{ car.driver }}の車</option>
+              <option v-for="car in selectedCars" :value="car.id" :key="car.id">{{ car.driver }}号</option>
             </select>
           </div>
         </div>
 
         <!-- コピーボタン -->
         <div class="pt-3 border-top border-dashed">
-          <button class="btn btn-secondary" @click="copyResult">📋 配車＆精算結果をコピーする</button>
+          <button class="btn btn-secondary" @click="copyResult">配車＆精算結果をコピーする</button>
         </div>
 
       </div>

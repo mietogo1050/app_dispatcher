@@ -257,8 +257,8 @@ settings: {
     getAttendanceLabel(code) {
       const labels = {
         both: '往復',
-        outward: '往路のみ',
-        return: '復路のみ',
+        outward: '行きのみ',
+        return: '帰りのみ',
         self: '送迎不要',
         absent: '不参加'
       };
