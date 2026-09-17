@@ -276,12 +276,11 @@ settings: {
       let text = '🚗 配車案内 \n';
       
       if (this.settings.date) text += `📅 日時: ${this.settings.date}\n`;
-      if (this.settings.meetingTime) text += `⏰ 集合時間: ${this.settings.meetingTime}\n`;
-      if (this.settings.meetingPlace) text += `📍 集合場所: ${this.settings.meetingPlace}\n`;
       if (this.settings.summary) text += `🚩 概要: ${this.settings.summary}\n`;      // 概要
       if (this.settings.destination) text += `🏁 行き先: ${this.settings.destination}\n`; // 🏁 行き先
       if (this.settings.memo) text += `📝 メモ: ${this.settings.memo}\n`;
-      
+            if (this.settings.meetingTime) text += `⏰ 部員号: ${this.settings.meetingTime}\n`;
+
       text += '\n--------------------\n';
       this.selectedCars.forEach((car, index) => {
         const passengers = this.getPassengersInCar(car.id).map(p => {
@@ -296,7 +295,7 @@ settings: {
         const costBoth = this.calculatePerPersonCost(car, 'both');
         const costSingle = this.calculatePerPersonCost(car, 'single');
 
-        text += `【${index + 1}台目】${car.driver}号`;
+        text += `${index + 1}${car.driver}号`;
         // text += `  [運転手] ${car.driver} (0円)\n`;
         text += ` ${passengers || 'なし'}\n`;
         if (car.cost > 0) {
