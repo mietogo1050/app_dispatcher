@@ -12,7 +12,7 @@ new Vue({
 
       newCar: {
         driver: '',
-        capacity: 5
+        capacity: 4
       },
 
 settings: {
@@ -308,6 +308,33 @@ settings: {
       navigator.clipboard.writeText(text).then(() => {
         alert('配車結果と精算金額をコピーしました！');
       });
+    },
+    // 💡 保存されたデータ（localStorage）の全消去処理
+    clearAllData() {
+      const isConfirmed = confirm(
+        '⚠️ 保存されている車両データ、メンバー情報、行動予定などをすべて消去しますか？\n（この操作は取り消せません）'
+      );
+
+      if (isConfirmed) {
+        // localStorage のクリア
+        localStorage.removeItem('noriai_app_data'); // または localStorage.clear();
+
+        // Vueの状態（data）を初期値にリセット
+        this.cars = [];
+        this.members = [];
+        this.settings = {
+          maxCars: 0,
+          date: '',
+          meetingTime: '',
+          meetingPlace: '',
+          summary: '',
+          destination: '',
+          memo: ''
+        };
+        this.importText = '';
+
+        alert('データをすべて消去しました。');
+      }
     }
   },
   watch: {

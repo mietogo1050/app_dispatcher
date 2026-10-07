@@ -28,6 +28,7 @@ const MEMBER_LIST = [
   { id: 124, name: 'カナト', type: 'child', grade: 'low' }, 
   { id: 125, name: 'イオリ', type: 'child', grade: 'low' }, 
   { id: 126, name: 'カンタ', type: 'child', grade: 'low' }, 
+  { id: 127, name: 'リュウタ', type: 'child', grade: 'low' }, 
 ];
 
 // アプリ起動時の初期メンバーは「なし」

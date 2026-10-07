@@ -35,56 +35,56 @@
 
         <hr class="text-info-emphasis">
 
-<h2 class="h6 card-title fw-bold text-info-emphasis">【行動予定・連絡事項】</h2>
-<div class="row g-2">
-  <!-- 日付（カレンダー選択） -->
-  <div class="col-md-4 mb-2">
-    <div class="input-group input-group-sm">
-      <span class="input-group-text">日付</span>
-      <input type="date" class="form-control" v-model="settings.date">
-    </div>
-  </div>
+        <h2 class="h6 card-title fw-bold text-info-emphasis">【行動予定・連絡事項】</h2>
+        <div class="row g-2">
+          <!-- 日付（カレンダー選択） -->
+          <div class="col-md-4 mb-2">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">日付</span>
+              <input type="date" class="form-control" v-model="settings.date">
+            </div>
+          </div>
 
-  <!-- 集合時間（手入力） -->
-  <div class="col-md-4 mb-2">
-    <div class="input-group input-group-sm">
-      <span class="input-group-text">集合時間</span>
-      <input type="text" class="form-control" v-model="settings.meetingTime" placeholder="例：朝 8:00">
-    </div>
-  </div>
+          <!-- 集合時間（手入力） -->
+          <div class="col-md-4 mb-2">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">集合時間</span>
+              <input type="text" class="form-control" v-model="settings.meetingTime" placeholder="例：朝 8:00">
+            </div>
+          </div>
 
-  <!-- 集合場所（手入力） -->
-  <div class="col-md-4 mb-2">
-    <div class="input-group input-group-sm">
-      <span class="input-group-text">集合場所</span>
-      <input type="text" class="form-control" v-model="settings.meetingPlace" placeholder="例：壱岐小学校">
-    </div>
-  </div>
+          <!-- 集合場所（手入力） -->
+          <div class="col-md-4 mb-2">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">集合場所</span>
+              <input type="text" class="form-control" v-model="settings.meetingPlace" placeholder="例：壱岐小学校">
+            </div>
+          </div>
 
-  <!-- 概要・イベント名 -->
-  <div class="col-md-6 mb-2">
-    <div class="input-group input-group-sm">
-      <span class="input-group-text">概要</span>
-      <input type="text" class="form-control" v-model="settings.summary" placeholder="例：〇〇地区夏季大会">
-    </div>
-  </div>
+          <!-- 概要・イベント名 -->
+          <div class="col-md-6 mb-2">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">概要</span>
+              <input type="text" class="form-control" v-model="settings.summary" placeholder="例：〇〇地区夏季大会">
+            </div>
+          </div>
 
-  <!-- 行き先・会場 -->
-  <div class="col-md-6 mb-2">
-    <div class="input-group input-group-sm">
-      <span class="input-group-text">行き先</span>
-      <input type="text" class="form-control" v-model="settings.destination" placeholder="例：雁ノ巣レクリエーションセンター">
-    </div>
-  </div>
+          <!-- 行き先・会場 -->
+          <div class="col-md-6 mb-2">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">行き先</span>
+              <input type="text" class="form-control" v-model="settings.destination" placeholder="例：雁ノ巣レクリエーションセンター">
+            </div>
+          </div>
 
-  <!-- メモ -->
-  <div class="col-md-6 mb-2">
-    <div class="input-group input-group-sm">
-      <span class="input-group-text">メモ</span>
-      <input type="text" class="form-control" v-model="settings.memo" placeholder="練習着/試合着、お弁当/おにぎり、補食">
-    </div>
-  </div>
-</div>
+          <!-- メモ -->
+          <div class="col-md-6 mb-2">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">メモ</span>
+              <input type="text" class="form-control" v-model="settings.memo" placeholder="練習着/試合着、お弁当/おにぎり、補食">
+            </div>
+          </div>
+        </div>
 
         <!-- 警告メッセージ -->
         <div v-if="alertMessage" class="alert alert-danger mb-0 mt-3 py-2 fw-bold" role="alert">
@@ -97,7 +97,12 @@
     <div class="card mb-4">
       <div class="card-body">
         <h2 class="h5 card-title text-primary border-start border-4 border-primary ps-2 mb-3">👤 参加・出欠設定</h2>
-
+        <!-- ⚙️ データ管理・初期化 -->
+        <div class="mt-4 mb-3 text-end">
+          <button class="btn btn-outline-danger btn-sm" @click="clearAllData">
+            🗑️ 保存データをすべて消去
+          </button>
+        </div>
         <!-- メンバー選択・追加フォーム -->
         <div class="card bg-warning-subtle border-warning-subtle mb-3">
           <div class="card-body">
